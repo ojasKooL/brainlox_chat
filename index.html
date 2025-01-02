@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brainlox Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        textarea {
+            width: 80%;
+            height: 100px;
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background: #f9f9f9;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat with Knowledge Base</h1>
+    <textarea id="query" placeholder="Type your question here..."></textarea><br>
+    <button onclick="sendQuery()">Submit</button>
+
+    <div id="response" class="response" style="display: none;"></div>
+    <p id="error" class="error"></p>
+
+    <script>
+        async function sendQuery() {
+            const query = document.getElementById("query").value;
+            const responseDiv = document.getElementById("response");
+            const errorDiv = document.getElementById("error");
+
+            responseDiv.style.display = "none";
+            errorDiv.textContent = "";
+
+            if (!query) {
+                errorDiv.textContent = "Please enter a question.";
+                return;
+            }
+
+            try {
+                const res = await fetch("http://127.0.0.1:5000/chat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ query })
+                });
+
+                if (!res.ok) {
+                    throw new Error("Failed to fetch response from server.");
+                }
+
+                const data = await res.json();
+                if (data.error) {
+                    errorDiv.textContent = `Error: ${data.error}`;
+                } else {
+                    responseDiv.textContent = `Chatbot: ${data.response.answer}`;
+                    responseDiv.style.display = "block";
+                }
+            } catch (error) {
+                errorDiv.textContent = error.message;
+            }
+        }
+    </script>
+</body>
+</html>
